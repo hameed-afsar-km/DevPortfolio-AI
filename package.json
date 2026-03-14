@@ -4,6 +4,7 @@
   "description": "DevPortfolio AI - AI-Powered Developer Platform",
   "scripts": {
     "postinstall": "cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm run build",
     "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\""
   },
   "devDependencies": {

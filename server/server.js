@@ -49,25 +49,36 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ message: err.message || 'Internal Server Error' })
 })
 
-// Connect DB and start
-const startServer = async () => {
+// Connect to MongoDB
+const connectDB = async () => {
   try {
     if (process.env.MONGODB_URI) {
       await mongoose.connect(process.env.MONGODB_URI)
       console.log('✅ MongoDB connected')
     } else {
-      console.log('⚠️  No MONGODB_URI set — running without database')
+      console.log('⚠️  No MONGODB_URI set')
     }
-    app.listen(PORT, () => {
-      console.log(`🚀 DevPortfolio AI server running at http://localhost:${PORT}`)
-    })
   } catch (err) {
     console.error('Failed to connect to MongoDB:', err.message)
-    // Start server anyway for development
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running at http://localhost:${PORT} (no DB)`)
-    })
   }
 }
 
-startServer()
+// Only start the server listener if run directly or during local development
+const startServer = async () => {
+  await connectDB()
+  app.listen(PORT, () => {
+    console.log(`🚀 DevPortfolio AI server running at http://localhost:${PORT}`)
+  })
+}
+
+// Export app for Vercel
+module.exports = app
+
+// Execute DB connection for serverless
+if (process.env.NODE_ENV === 'production') {
+  connectDB()
+}
+
+if (process.env.NODE_ENV !== 'production' || require.main === module) {
+  startServer()
+}
